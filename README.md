@@ -21,3 +21,10 @@ meditation center
 
 ## 협업툴
 
+Github Issue & Github Pull Request
+
+<img width="449" alt="github cat" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png">
+
+> Why Github Issue?
+
+깃허브 이슈를 활용하면 태그를 사용하여 버그, 기능추가, 할 일과 같은 다양한 관심사를 한 눈에 볼 수 있습니다. 커밋과 Pull Request를 자유롭게 링크하여 빠른 참조가 가능하며, 백링크 기능을 통해 해당 이슈를 언급한 다른 이슈나 PR, 커밋을 되짚어 올라갈 수도 있습니다.
