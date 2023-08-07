@@ -16,8 +16,11 @@ meditation center
 ## 기술 스택
 
 - Backend
-  - flask
-  - MongoDB
+  - flask: web application and user authentication
+  - MongoDB: database for user & chat session
+- Frontend
+  - Jinja2 Template: html code that dynamically rendered by flask (server side rendering)
+  - Javascript: dynamic loading html element during chat session
 
 ## 협업툴
 
