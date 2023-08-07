@@ -16,11 +16,11 @@ meditation center
 ## 기술 스택
 
 - Backend
-  - flask: web application and user authentication
-  - MongoDB: database for user & chat session
+  - flask: 웹 애플리케이션으로, 동적 웹 페이지 로딩과 사용자 인증, openai와의 상호작용을 담당합니다.
+  - MongoDB: 챗봇과의 대화를 저장하고 추후에 다시 로드하거나 답변 regeneration을 통한 데이터 수정을 담당합니다.
 - Frontend
-  - Jinja2 Template: html code that dynamically rendered by flask (server side rendering)
-  - Javascript: dynamic loading html element during chat session
+  - Jinja2 Template: 동적으로 웹 페이지를 로드하는 데 사용되는 템플릿 파일입니다. 
+  - Javascript: 챗봇과의 대화창을 컨트롤하기 위해 HTML Element를 다루어야 합니다. 이때 JS를 사용할 예정입니다.
 
 ## 협업툴
 
