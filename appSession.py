@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 
@@ -10,9 +10,9 @@ app.secret_key = 'f289040f70d7274ed6bf86d3906b17ebee34e83d7053126d0029f447d82f21
 ID = "hello"
 PW = "world"
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('localhost', 27017)
 db = client['WEEK00_TEAM7']
-collection = db['A']
+collection = db['users']
 collection2 = db['B']
 collection3 = db['C']
 
@@ -40,9 +40,24 @@ def logout():
     session.pop("userID")
     return redirect(url_for('loginRender'))
 
-@app.route('/register')
+@app.route('/register', methods=["GET", "POST"])
 def registerRender():
-    return render_template("register.html")
+    if request.method == "POST":
+        userId_receive = request.form['userId']
+        userPwd_receive = request.form['userPw']
+        
+        user = {
+            'id': userId_receive,
+            'pwd': userPwd_receive
+        }
+        if userId_receive == '' or userPwd_receive == '':
+            db.users.insert_one()
+        else:
+            db.users.insert_one(user)
+            return jsonify({'result':'success', 'msg':'POST 연결되었습니다!'})
+        print(user)
+    else:
+        return render_template("register.html")
 
 @app.route('/main')
 def mainRender():

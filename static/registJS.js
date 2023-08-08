@@ -5,8 +5,8 @@ let elMismatchmessage = document.querySelector('.mismatch-message')
 //회원가입. ajax POST통신이 원활하게 되면 로그인화면으로 redirect.
 //ajax POST통신이 원활하지않다면 alert
 function registerMember(){
-    let userId = document.getElementById('id_give').val();
-    let userPassword = document.getElementById('pwd_give').val();
+    let userId = document.getElementById('id_give').value;
+    let userPassword = document.getElementById('pwd_give').value;
 
     $.ajax({
         type: "POST",
