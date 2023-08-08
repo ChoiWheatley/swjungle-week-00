@@ -1,3 +1,4 @@
+import chatbot
 from flask import Flask, render_template, request, redirect
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
@@ -43,13 +44,9 @@ def mainRender():
         return render_template("main.html")
     # POST
     json = request.get_json()
-    user_status = json.get('user_status')
-    user_goal = json.get('user_goal')
-    # TODO - connect to openai
-    return {
-        "message": f"test response that can be returned from openai. \
-            user_status is \'{user_status}\' and user_goal is \'{user_goal}\'"
-    }
+    completion = chatbot.create_completion(json)
+
+    return {"message": completion.choices[0].message.content}
 
 
 @app.route('/regist' , methods=['POST'])
