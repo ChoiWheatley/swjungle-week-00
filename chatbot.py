@@ -1,6 +1,12 @@
 import openai
+from decouple import config
 
-PROMPTS = [("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는"), ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.")]
+
+# type:(json_key, prompt_message, request_message)
+PROMPTS = [
+    ("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는 "),
+    ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
+]
 
 MESSAGES = [
     {
@@ -38,12 +44,21 @@ MESSAGES = [
     머릿속이 생각으로 가득차거나 주변이 산만한 경우에도 명상은 도움이 많이 됩니다. 마음챙김 명상을 통하여 자신을 하나의 큰 도넛이라고
     생각해보세요. 모든 생각과 소음이 어떤 의식적인 가공 없이 내 안에 커다란 구멍을 통해 자유롭게 지나가는 상상을 해 보세요.
 
-    자, 이제 당신의 현재 정신상태와 이루고자 하는 목표에 대하여 알려주세요. 제가 두 가지 답변을 바탕으로 명상음악과 명상법에 대하여
-    안내해드리겠습니다.""",
+    자, 이제 당신의 현재 정신상태와 이루고자 하는 목표에 대하여 알려주세요. 제가 두 가지 답변을 바탕으로 명상음악과 명상법에 대하여 안내해드리겠습니다.""",
     },
 ]
 
 
 def create_completion(json):
-    """TODO - impl"""
-    pass
+    """openai에게 문맥과 초기 대화를 넣어 요청을 보내게 만드는 함수"""
+
+    question = "명상을 하려고 합니다. "
+
+    for json_key, _prompt_message, request_message in PROMPTS:
+        question += request_message
+        question += str(json.get(json_key))
+
+    openai.api_key = config("OPENAI_API_KEY")
+    return openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=MESSAGES + [{"role": "user", "content": question}]
+    )
