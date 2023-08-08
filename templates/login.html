@@ -9,11 +9,25 @@
 <body>
     <div>This is login webpage</div>
 
+    <form action="/main">
 
-    <form method="post" action="/login"
+        <div class="input-box">
+            <input id="username" type="text" name="username" placeholder="아이디를 입력하세요.">
+            <label for="username"></label>
+        </div>
+
+        <div class="input-box">
+            <input id="password" type="password" name="password" placeholder="비밀번호를 입력하세요.">
+            <label for="password"></label>
+        </div>
+        <input type="submit" value="Log in">
+    </form>
+    <div id="forgot">
+        <form action="/register">
+            <button type="submit">회원가입</button>
+        </form>
+    </div>
 
 
-
-    <div>봇</div> : {{bot_answer}}
 </body>
 </html>
