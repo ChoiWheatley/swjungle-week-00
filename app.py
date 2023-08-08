@@ -18,9 +18,35 @@ def loginRender():
 def registerRender():
     return render_template("register.html")
 
-@app.route('/main')
+@app.route('/main', methods=["GET", "POST"])
 def mainRender():
-    return render_template("main.html")
+    """
+    [GET]
+    return main.html
+
+    [POST]
+    request_type = application/json
+    request_scheme = {
+        'user_status': ['불안', '초조', '산만'],
+        'user_goal': '집중력 향상'
+    }
+    response_type = application/json
+    response_scheme = {
+        'message': '적어도 3 문단 이상의 긴 문자열'
+    }
+    """
+    if request.method == "GET":
+        return render_template("main.html")
+    # POST
+    json = request.get_json()
+    user_status = json.user_status
+    user_goal = json.user_goal
+    # TODO - connect to openai
+    return {
+        "message": f"test response that can be returned from openai. \
+            user_status is \'{user_status}\' and user_goal is \'{user_goal}\'"
+    }
+
 
 @app.route('/login')
 def login():
