@@ -39,8 +39,8 @@ def mainRender():
         return render_template("main.html")
     # POST
     json = request.get_json()
-    user_status = json.user_status
-    user_goal = json.user_goal
+    user_status = json.get('user_status')
+    user_goal = json.get('user_goal')
     # TODO - connect to openai
     return {
         "message": f"test response that can be returned from openai. \
