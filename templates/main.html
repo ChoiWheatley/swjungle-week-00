@@ -1,12 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Webpage Title -->
+    <title>Hello, world!</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
     <title>Hello Jinja2</title>
 </head>
 <body>
-    <p>This is main webpage</p>
+    <div class="section has-text-centered">
+        <h1 class="title">login</h1>
+        <div class="container" style="width:60%">
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label" for="userid"></label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <input type="text" class="input" id="userid" aria-describedby="emailHelp"
+                                   placeholder="아이디를 입력하세요.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label" for="userpwd"></label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <input type="password" class="input" id="userpwd" placeholder="비밀번호를 입력하세요.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="button is-primary" onclick="login()">로그인</button>
+            <button class="button is-primary" onclick="registerRender()">회원가입</button>
+        </div>
+    </div>
 </body>
 </html>
