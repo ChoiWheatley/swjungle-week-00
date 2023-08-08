@@ -1,6 +1,9 @@
+import openai
+import .chatbot
 from flask import Flask, render_template, request, redirect
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
+from decouple import config
 
 app = Flask(__name__)
 
@@ -41,7 +44,14 @@ def mainRender():
     json = request.get_json()
     user_status = json.get('user_status')
     user_goal = json.get('user_goal')
+    question = f"명상을 하려고 합니다. 지금 나의 상태는 {user_status}이고"
     # TODO - connect to openai
+    openai.api_key = config("OPENAI_API_KEY")
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chatbot.MESSAGES.append({"role": "user", "content": question})
+    )
+
     return {
         "message": f"test response that can be returned from openai. \
             user_status is \'{user_status}\' and user_goal is \'{user_goal}\'"
