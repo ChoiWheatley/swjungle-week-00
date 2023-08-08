@@ -16,7 +16,11 @@ def loginRender():
 
 @app.route('/register', methods=['GET', 'POST'])
 def registerRender():
-    return render_template("register.html")
+    #GET
+    if request.method == "POST":
+        return render_template("login.html")
+    else :
+        return render_template("register.html")
 
 @app.route('/main', methods=["GET", "POST"])
 def mainRender():
@@ -48,7 +52,7 @@ def mainRender():
     }
 
 
-@app.route('/login' , methods=['POST'])
+@app.route('/regist' , methods=['POST'])
 def login():
     return 'hello'
 

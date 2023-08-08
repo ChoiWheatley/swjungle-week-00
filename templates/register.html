@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="static/index.js"></script>
 
     <title>Document</title>
 </head>
 <body>
     <div>This is register webpage.</div>
 
-    <form action="/login" method="POST">
-    <div id="register_card">
+    <form method="POST" id="registerForm">
+
         <div class="input-box">
             <input id="id_give" type="text" name="username" placeholder="아이디를 입력하세요.">
             <label for="username"></label>
@@ -25,11 +24,12 @@
 
         <div class="input-box" id="repeat">
             <input id="pwd_repeat" type="password" name="password" placeholder="비밀번호를 다시 입력하세요.">
-            <div class="mismatch-message hide">비밀번호 불일치</div>
             <label for="password"></label>
         </div>
         <input type="submit" value="회원가입">
-    </div>
+    
     </form>
+
+    <script src="static/registJS.js"></script>
 </body>
 </html>
