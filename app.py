@@ -4,9 +4,14 @@ from werkzeug.security import generate_password_hash
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
+from decouple import config
 
 app = Flask(__name__)
 
+# 시크릿키 설정
+app.secret_key = config('APP_SECRET_KEY')
+
+client = MongoClient('localhost', 27017)
 # 시크릿키 설정
 app.secret_key = config('APP_SECRET_KEY')
 
