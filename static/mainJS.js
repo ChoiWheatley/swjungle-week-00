@@ -103,7 +103,6 @@ function POSTJSON(){
             $("#btnHideShow").show();
 
             createHistory(response);
-            callHistoryData();
             gSession.setChatId(response["_id"]);
         },
         complete: function(){
