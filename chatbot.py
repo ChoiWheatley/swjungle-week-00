@@ -1,12 +1,12 @@
+from dataclasses import dataclass
+import inspect
+from re import A
+from typing import List
+from bson import ObjectId
 import openai
 from decouple import config
 
-
-# type:(json_key, prompt_message, request_message)
-PROMPTS = [
-    ("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는 "),
-    ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
-]
+openai.api_key = config("OPENAI_API_KEY")
 
 MESSAGES = [
     {
@@ -48,17 +48,58 @@ MESSAGES = [
     },
 ]
 
+PROMPTS = [
+    # (json_key, prompt_message, request_message)
+    ("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는 "),
+    ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
+]
 
-def create_completion(json):
+
+def get_ai_response(ai_question):
     """openai에게 문맥과 초기 대화를 넣어 요청을 보내게 만드는 함수"""
 
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=MESSAGES + [{"role": "user", "content": ai_question}],
+    )
+
+    return completion.choices[0].message.content
+
+
+def create_question(user_submit) -> str:
     question = "명상을 하려고 합니다. "
 
     for json_key, _prompt_message, request_message in PROMPTS:
         question += request_message
-        question += str(json.get(json_key))
+        question += str(user_submit.get(json_key))
+        question += "입니다. "
 
-    openai.api_key = config("OPENAI_API_KEY")
-    return openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", messages=MESSAGES + [{"role": "user", "content": question}]
-    )
+    question += "저에게 필요한 명상음악과 명상법에 대하여 알려주세요."
+    return question
+
+
+@dataclass
+class ChatBot:
+    _id: str
+    user_id: str
+    user_status: List[str]
+    user_goal: str
+    ai_response: List[str]
+
+    def __init__(
+        self,
+        _id: ObjectId,
+        user_id: str,
+        user_status: List[str],
+        user_goal: str,
+        ai_response: List[str],
+    ):
+        self._id = str(_id)
+        self.user_id = user_id
+        self.user_status = user_status
+        self.user_goal = user_goal
+        self.ai_response = ai_response
+
+    @classmethod
+    def attrs(cls):
+        return inspect.signature(cls).parameters
