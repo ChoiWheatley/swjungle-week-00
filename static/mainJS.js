@@ -11,20 +11,10 @@ let findHistory = "";
 
 let gSession = {
     chatId: null,
-    userStatus: [],
-    userGoal: null,
 
-    setChatId: (id) => {
+    setChatId: function(id) {
         this.chatId = id;
     },
-
-    setUserStatus: (stats) => {
-        this.userStatus = stats;
-    },
-
-    setUserGoal: (goal) => {
-        this.userGoal = goal;
-    }
 };
 
 let $messages = document.querySelector(".messages");
@@ -141,6 +131,7 @@ function POSTJSON2(){
             <p>${msg}</p>`;
 
             //AJAX요청이 성공하면 list에 항목 추가
+            // createSentLiElement($sentUl, tmpRegenerateText);
             $("#sentUl").append("<li class=\"sent\">" + tmpRegenerateText + "</li>");
         },
         complete: function(){
@@ -222,23 +213,19 @@ function callHistoryData(){
     .done((data) => {
         // console.log(data);
         document.querySelectorAll("[type=history]").forEach((elem) => {
-            gSession.setChatId(elem._id);
-            gSession.setUserStatus(elem.user_status);
-            gSession.setUserGoal(elem.user_goal);
 
             elem.addEventListener("click", (e) => {
                 /**
                  * 
                 */
+                gSession.setChatId(elem.getAttribute("id"));
                 clearChat();
                 $.ajax({
                     type: "GET",
                     url: "/api/chat/" + elem.id,
                     contentType: "application/json",
                     success: (chat) => {
-                        $messages.innerHTML = `
-        <ul id = "sentUl">
-
+                        $sentUl.innerHTML = `
           <li class="sent">
             <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" />
             <p>현재 상태를 모두 체크해 주세요.</p>
@@ -257,11 +244,6 @@ function callHistoryData(){
             <img src="https://velog.velcdn.com/images/doyolee/post/8ad37313-2695-4a32-af27-af51d50f7387/image.png" alt="" id="img2"/>
             <p id ="form2"></p>
           </li>
-
-          <li class="sent">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" id="img3"/>
-            <p id="chat1"></p>
-        </ul>
                         `;
                         makeCheckbox1();
                         makeCheckbox2();
@@ -273,14 +255,12 @@ function callHistoryData(){
                         document.querySelector(`[value=${chat.user_goal}]`).checked = true;
 
                         for (let ai_response of chat.ai_response) {
-                            const $li = document.createElement("li");
-                            $li.className = "sent";
-                            $messages.appendChild();
-
+                            createSentLiElement($sentUl, ai_response);
                         }
                     },
                     complete: () => {
                         hideLoading();
+                        $("#btnHideShow").show();
                     }
                 })
             });
