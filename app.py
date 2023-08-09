@@ -1,4 +1,6 @@
 from dataclasses import asdict
+import inspect
+
 from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
@@ -130,7 +132,9 @@ def history(username):
     cursor = db["chats"].find({"user_id": username})
     if not cursor:
         raise NotFound("chat not found")
-    return cursor
+    return [
+        {k: v for k, v in cur.items() if k in inspect.signature(ChatBot).parameters}
+        for cur in cursor]
 
 
 @app.route("/api/chat/<int:id>", methods=["GET", "POST"])
