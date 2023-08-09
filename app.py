@@ -4,7 +4,6 @@ from werkzeug.security import generate_password_hash
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
-from decouple import config
 
 app = Flask(__name__)
 
@@ -20,6 +19,13 @@ db = client['WEEK00_TEAM7']
 collection = db['users']
 collection2 = db['B']
 collection3 = db['C']
+
+# auto increament key 설정
+counter = 0
+def count():
+    global counter    
+    counter += 1
+    return counter
 
 @app.route('/')
 def entrypoint():
@@ -66,6 +72,7 @@ def registerRender():
         userPwd_receive = hash_and_salted_password
         
         user = {
+            'uid': count(),
             'id': userId_receive,
             'pwd': userPwd_receive
         }
