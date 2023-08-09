@@ -1,6 +1,11 @@
-import chatbot
+from dataclasses import asdict
+import inspect
+
+from bson import ObjectId
+from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
+from werkzeug.exceptions import Unauthorized, NotFound
 from pymongo import MongoClient
 from decouple import config
 from decouple import config
@@ -17,14 +22,14 @@ app.secret_key = config('APP_SECRET_KEY')
 client = MongoClient('localhost', 27017)
 db = client['WEEK00_TEAM7']
 collection = db['users']
-collection2 = db['B']
+collection2 = db['chats']
 collection3 = db['C']
 
 @app.route('/')
 def entrypoint():
-    if 'username' in session:
+    if '_id' in session:
         return f'''반갑습니다 {session["username"]}님!<br>
-        <a href="/main/{session["username"]}">mainPage</a> 
+        <a href="/main/{session["_id"]}">mainPage</a> 
         <a href="/logout">Logout</a>'''
     else:
         return redirect('/login')
@@ -47,8 +52,9 @@ def login():
         flash("존재하지 않는 유저입니다.")
         return render_template("login.html")
     session["username"] = userId_receive
+    session["_id"] = str(user["_id"])
     session.permanent = True
-    return redirect(f'/main/{userId_receive}')
+    return redirect(f'/main/{session["_id"]}')
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -80,30 +86,93 @@ def registerRender():
     else:
         return render_template("register.html")
 
-@app.route('/main/<string:username>', methods=["GET", "POST"])
-def mainRender(username):
+@app.route('/main/<string:_id>', methods=["GET", "POST"])
+def mainRender(_id):
     """
-    [GET]
+    ## GET
     return main.html
 
-    [POST]
-    request_type = application/json
-    request_scheme = {
-        'user_status': ['불안', '초조', '산만'],
-        'user_goal': '집중력 향상'
-    }
-    response_type = application/json
-    response_scheme = {
-        'message': '적어도 3 문단 이상의 긴 문자열'
-    }
+    ## POST
+
+    새로운 채팅을 생성할 때 사용함.
+
+    ### POST request type
+
+    - user_status: ['불안', '초조', '산만'],
+    - user_goal: '집중력 향상'
+
+    ### POST response type
+
+    새로 생성된 채팅 객체(ChatBot)의 dict를 리턴함.
     """
+    if _id != session["_id"]:
+        raise Unauthorized("user id is different")
+
     if request.method == "GET":
         return render_template("main.html")
     # POST
-    print(request.headers["content-Type"])
-    json = request.get_json()
-    completion = chatbot.create_completion(json)
-    return {"message": completion.choices[0].message.content}
+    # 새로운 채팅 세션을 생성할 때 사용함
+    body_dict = request.get_json()
+    question = create_question(body_dict)
+    ai_response = get_ai_response(question)
+
+    body_dict["ai_response"] = [ai_response]
+    body_dict["user_id"] = _id
+
+    result = db["chats"].insert_one(body_dict)
+    cursor = db["chats"].find_one(result.inserted_id)
+
+    if cursor:
+        return asdict(ChatBot(**cursor))
+    raise NotFound("chat not found")
+
+
+@app.route("/api/history/<string:user_id>", methods=["GET"])
+def history(user_id):
+    """
+    유저의 히스토리 리스트를 쿼리할 때 사용함.
+
+    ### GET response type
+
+    - List[dict(ChatBot)]
+    """
+    cursor = db["chats"].find({"user_id": user_id})
+    if not cursor:
+        raise NotFound("chat not found")
+    return [asdict(ChatBot(**cur)) for cur in cursor]
+
+
+@app.route("/api/chat/<string:_id>", methods=["GET", "POST"])
+def chat(_id: str):
+    """
+    chat regeneration에 사용될 함수
+
+    ### POST request type:
+
+    - None
+
+    ### POST response type:
+
+    - 수정된 dict(ChatBot)
+    """
+    cursor = db["chats"].find_one(ObjectId(_id))
+    if not cursor:
+        raise NotFound("Chat not found")
+    if request.method == "GET":
+        return asdict(ChatBot(**cursor))
+
+    # POST
+
+    question = create_question(cursor)
+    ai_response = get_ai_response(question)
+
+    db["chats"].update_one({"_id": ObjectId(_id)}, {"$push": {"ai_response": ai_response}})
+    cursor = db["chats"].find_one(ObjectId(_id))
+
+    if not cursor:
+        raise NotFound("Chat not found")
+    return asdict(ChatBot(**cursor))
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)
