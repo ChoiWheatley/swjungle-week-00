@@ -11,21 +11,10 @@ app = Flask(__name__)
 app.secret_key = config('APP_SECRET_KEY')
 
 client = MongoClient('localhost', 27017)
-# 시크릿키 설정
-app.secret_key = config('APP_SECRET_KEY')
-
-client = MongoClient('localhost', 27017)
 db = client['WEEK00_TEAM7']
 collection = db['users']
 collection2 = db['B']
 collection3 = db['C']
-
-# auto increament key 설정
-counter = 0
-def count():
-    global counter    
-    counter += 1
-    return counter
 
 @app.route('/')
 def entrypoint():
@@ -72,7 +61,6 @@ def registerRender():
         userPwd_receive = hash_and_salted_password
         
         user = {
-            'uid': count(),
             'id': userId_receive,
             'pwd': userPwd_receive
         }
