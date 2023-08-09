@@ -5,6 +5,7 @@ let elMismatchmessage = document.querySelector('.mismatch-message')
 //회원가입. ajax POST통신이 원활하게 되면 로그인화면으로 redirect.
 //ajax POST통신이 원활하지않다면 alert
 
+
 // password, password 확인 값 틀리면 alert
 document.getElementById('registerForm').addEventListener('submit', function(e) {
     if(!isMatch(passwordRegister.value, passwordRegisterRepeat.value)){
