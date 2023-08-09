@@ -20,7 +20,7 @@ collection3 = db['C']
 def entrypoint():
     if 'username' in session:
         return f'''반갑습니다 {session["username"]}님!<br>
-        <a href="/main/{session["username"]}">mainPage</a> 
+        <a href="/main/{session["_id"]}">mainPage</a> 
         <a href="/logout">Logout</a>'''
     else:
         return redirect('/login')
@@ -41,9 +41,11 @@ def login():
         flash("존재하지 않는 유저입니다.")
         return render_template("login.html")
     session["username"] = userId_receive
+    session['_id'] = str(user['_id'])
+    print(session['_id'])
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=30)
-    return redirect(f'/main/{userId_receive}')
+    return redirect(f'/main/{session["_id"]}')
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -78,8 +80,8 @@ def registerRender():
     else:
         return render_template("register.html")
 
-@app.route('/main/<string:username>', methods=["GET", "POST"])
-def mainRender(username):
+@app.route('/main/<string:_id>', methods=["GET", "POST"])
+def mainRender(_id):
     """
     [GET]
     return main.html
