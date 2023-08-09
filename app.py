@@ -1,21 +1,15 @@
 from dataclasses import asdict
-import inspect
-
 from bson import ObjectId
 from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
+from datetime import timedelta
 from werkzeug.security import generate_password_hash
 from werkzeug.exceptions import Unauthorized, NotFound
 from pymongo import MongoClient
 from decouple import config
-from decouple import config
 
 app = Flask(__name__)
 
-# 시크릿키 설정
-app.secret_key = config('APP_SECRET_KEY')
-
-client = MongoClient('localhost', 27017)
 # 시크릿키 설정
 app.secret_key = config('APP_SECRET_KEY')
 
@@ -41,10 +35,8 @@ def login():
     # POST
     userId_receive = request.form.get('username')
     userPwd_receive = request.form.get('password')
-    if userId_receive == "":
-        flash("아이디를 입력해주세요.")
-    if userPwd_receive == "":
-        flash("비밀번호를 입력해주세요.")
+    if userId_receive == "" or userPwd_receive == "":
+        flash("빈칸을 모두 입력해주세요!")
         return render_template("login.html")
     
     user = db.users.find_one({'id':userId_receive}, {'pwd':userPwd_receive})
@@ -52,8 +44,10 @@ def login():
         flash("존재하지 않는 유저입니다.")
         return render_template("login.html")
     session["username"] = userId_receive
-    session["_id"] = str(user["_id"])
+    session['_id'] = str(user['_id'])
+    print(session['_id'])
     session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=30)
     return redirect(f'/main/{session["_id"]}')
 
 @app.route('/logout', methods=['GET'])
@@ -76,13 +70,16 @@ def registerRender():
             'id': userId_receive,
             'pwd': userPwd_receive
         }
-        if userId_receive == '' or userPwd_receive == '':
-            db.users.insert_one()
+        if userId_receive == '' or request.form.get('password') == '':
+            flash("빈칸을 모두 입력해주세요!")
+            return render_template("register.html")
+        if db.users.find_one({'id':userId_receive}) is not None:
+            flash("다른 분이 사용 중인 아이디입니다. 다시 입력해주세요.")
+            return render_template("register.html")
         else:
             db.users.insert_one(user)
             flash("회원가입에 성공하였습니다!")
             return redirect('/login')
-        print(user)
     else:
         return render_template("register.html")
 
