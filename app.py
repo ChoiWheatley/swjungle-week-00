@@ -101,18 +101,10 @@ def mainRender(username):
     if request.method == "GET":
         return render_template("main.html")
     # POST
+    print(request.headers["content-Type"])
     json = request.get_json()
     completion = chatbot.create_completion(json)
     return {"message": completion.choices[0].message.content}
-
-
-@app.route('/login' , methods=['GET', 'POST'])
-def login():
-    if request.method == "GET":
-        return render_template("login.html")
-    # POST
-    # TODO - Do some authentication
-    return redirect("/main")
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)
