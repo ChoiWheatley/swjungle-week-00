@@ -12,7 +12,13 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <title>login</title>
 </head>
+<style>
+    .box {
+        margin: auto;
+        margin-top: 200px;
+    }
 
+</style>
 <body>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -23,8 +29,8 @@
             </ul>
         {% endif %}
     {% endwith %}
-    <div class="box column is-two-fifths">
-        <div class="is-size-3" style="font-weight: 400;">LOGIN</div>
+    <div class="box column is-one-third">
+        <div class="is-size-3 block" style="font-weight: 400;">LOGIN</div>
         <form action="/login" method="POST">
             <div class="field">
                 <p class="control has-icons-left">
