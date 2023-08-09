@@ -1,6 +1,7 @@
-import chatbot
+from chatbot import ChatBot
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
+from werkzeug.exceptions import Unauthorized
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
@@ -18,7 +19,7 @@ app.secret_key = config('APP_SECRET_KEY')
 client = MongoClient('localhost', 27017)
 db = client['WEEK00_TEAM7']
 collection = db['users']
-collection2 = db['B']
+collection2 = db['chats']
 collection3 = db['C']
 
 @app.route('/')
@@ -98,12 +99,19 @@ def mainRender(username):
         'message': '적어도 3 문단 이상의 긴 문자열'
     }
     """
+    if username != session["username"]:
+        raise Unauthorized("Username is different")
+
     if request.method == "GET":
         return render_template("main.html")
     # POST
     json = request.get_json()
-    completion = chatbot.create_completion(json)
-    return {"message": completion.choices[0].message.content}
+    chatbot = ChatBot(session["username"], json)
+
+    db["chats"].insert_one(chatbot.asdict())
+
+    return {"message": chatbot.get_ai_response()}
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)

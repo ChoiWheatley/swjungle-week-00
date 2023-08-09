@@ -1,12 +1,8 @@
+from typing import List
 import openai
 from decouple import config
 
-
-# type:(json_key, prompt_message, request_message)
-PROMPTS = [
-    ("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는 "),
-    ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
-]
+openai.api_key = config("OPENAI_API_KEY")
 
 MESSAGES = [
     {
@@ -49,16 +45,48 @@ MESSAGES = [
 ]
 
 
-def create_completion(json):
-    """openai에게 문맥과 초기 대화를 넣어 요청을 보내게 만드는 함수"""
+class ChatBot:
+    username: str  # TODO - replace user_id instead of username
+    user_submit: dict
+    ai_question: str
+    ai_response: List[str]
+    PROMPTS = [
+        # (json_key, prompt_message, request_message)
+        ("user_status", "당신의 현재 상태를 알려주세요.", "지금 나의 상태는 "),
+        ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
+    ]
 
-    question = "명상을 하려고 합니다. "
+    def __init__(self, username, user_submit) -> None:
+        self.user_submit = user_submit
+        self.ai_question = self.create_question(user_submit)
+        self.username = username
+        self.ai_response = []
 
-    for json_key, _prompt_message, request_message in PROMPTS:
-        question += request_message
-        question += str(json.get(json_key))
+    def asdict(self):
+        return {
+            "username": self.username,
+            "user_submit": self.user_submit,
+            "ai_question": self.ai_question,
+            "ai_response": self.ai_response,
+        }
 
-    openai.api_key = config("OPENAI_API_KEY")
-    return openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", messages=MESSAGES + [{"role": "user", "content": question}]
-    )
+    def get_ai_response(self):
+        """openai에게 문맥과 초기 대화를 넣어 요청을 보내게 만드는 함수"""
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=MESSAGES + [{"role": "user", "content": self.ai_question}],
+        )
+
+        self.ai_response += [completion.get("choices")[0].message.content]
+        return self.ai_response
+
+    def create_question(self, user_submit) -> str:
+        question = "명상을 하려고 합니다. "
+
+        for json_key, _prompt_message, request_message in ChatBot.PROMPTS:
+            question += request_message
+            question += str(user_submit.get(json_key))
+
+        question += "저에게 필요한 명상음악과 명상법에 대하여 알려주세요."
+        return question
