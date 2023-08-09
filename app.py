@@ -1,14 +1,10 @@
 from dataclasses import asdict
-import inspect
-
 from bson import ObjectId
-
 from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
 from datetime import timedelta
 from werkzeug.security import generate_password_hash
 from werkzeug.exceptions import Unauthorized, NotFound
-from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
 
