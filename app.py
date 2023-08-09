@@ -101,6 +101,7 @@ def mainRender(username):
     if request.method == "GET":
         return render_template("main.html")
     # POST
+    print(request.headers["content-Type"])
     json = request.get_json()
     completion = chatbot.create_completion(json)
     return {"message": completion.choices[0].message.content}
