@@ -3,7 +3,7 @@ let promptList2 = ['깊은휴식', '피곤함극복', '우울감극복', '신나
 let tmpList = []
 let tmpList2;
 
-let loginSessionObjectId = session['_id'];
+let loginSessionObjectId = sessionStorage.getItem("user_id");
 
 let tmpRegenerateText = "";
 
@@ -80,7 +80,7 @@ function POSTJSON(){
         data: JSON.stringify(tmp),
         dataType: 'json',
         success: function (response) {
-            let msg = response['message'];
+            let msg = response['ai_response'];
             document.getElementById('chat1').innerHTML = msg;
             $("#btnHideShow").show();
 
@@ -107,7 +107,7 @@ function POSTJSON2(){
         data: JSON.stringify(tmp),
         dataType: 'json',
         success: function (response) {
-            let msg = response['message'];
+            let msg = response['ai_response'];
 
             tmpRegenerateText = `<img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" id="img1"/>
             <p>${msg}</p>`;
@@ -171,33 +171,17 @@ $("#contact1").click(function(){
 //백엔드에 HistoryData 호출
 function callHistoryData(){
 
-    showLoading();
-
-    var splitString = document.getElementById(findHistory).split(',');
-    var user_goalVariable = splitString[splitString.length-1];
-    splitString.pop();
-    var user_statusList = splitString;
-
-    var tmp = {
-        'user_status': user_statusList,
-        'user_goal': user_goalVariable
-    };
-
-    var postUrl = "/main/" + loginSessionObjectId;
+    var postUrl = "/api/history/" + loginSessionObjectId;
 
     $.ajax({
-        type: 'POST',
+        type: 'GET',
         url: postUrl,
         contentType: 'application/json',
-        data: JSON.stringify(tmp),
-        dataType: 'json',
-        success: function (response) {
-            let msg = response['message'];
-
+        success: function (responses) {
+            for (let response of responses) {
+                createHistory(response["user_status"], response["user_goal"]);
+            }
         },
-        complete: function(){
-            hideLoading();
-        }
     })
 }
 
@@ -208,18 +192,16 @@ function openHistory(){
 
 
 //두 번째 버튼을 누르면 히스토리가 생성됨(좌측)
-function createHistory(){
+function createHistory(user_statuses, user_goal){
     var tmpContent = "";
-    
-    for(var i = 0; i<tmpList.length; i++){
-        tmpContent += tmpList[i] + ",";
-    }
-    tmpContent += tmpList2;
-    findHistory = tmpContent;
-    var chatTmp = document.getElementById('chat1').textContent.length;
-    var chatAll = document.getElementById('chat1').textContent;
+    var tmpDetail = "";
 
-    var tmpDetail = pTagTextNumber(chatTmp, chatAll);
+    for (let user_status of user_statuses) {
+        tmpContent += user_status + ",";
+    }
+    findHistory = tmpContent;
+
+    tmpDetail = user_goal
 
     var tmpHistory = `
     <div class="wrap">
