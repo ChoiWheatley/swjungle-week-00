@@ -1,7 +1,8 @@
-from chatbot import ChatBot
+from dataclasses import asdict
+from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, NotFound
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
@@ -85,19 +86,22 @@ def registerRender():
 @app.route('/main/<string:username>', methods=["GET", "POST"])
 def mainRender(username):
     """
-    [GET]
+    ## GET
     return main.html
 
-    [POST]
-    request_type = application/json
-    request_scheme = {
-        'user_status': ['불안', '초조', '산만'],
-        'user_goal': '집중력 향상'
-    }
-    response_type = application/json
-    response_scheme = {
-        'message': '적어도 3 문단 이상의 긴 문자열'
-    }
+    ## POST
+
+    새로운 채팅을 생성할 때 사용함.
+
+    ### POST request type
+
+    - user_status: ['불안', '초조', '산만'],
+    - user_goal: '집중력 향상'
+    - user_id: TODO - 현재는 username 이지만, 유니크한 user_id가 와야함.
+
+    ### POST response type
+
+    새로 생성된 채팅 객체(ChatBot)의 dict를 리턴함.
     """
     if username != session["username"]:
         raise Unauthorized("Username is different")
@@ -105,13 +109,59 @@ def mainRender(username):
     if request.method == "GET":
         return render_template("main.html")
     # POST
-    print(request.headers["content-Type"])
-    json = request.get_json()
-    chatbot = ChatBot(session["username"], json)
+    # 새로운 채팅 세션을 생성할 때 사용함
+    body_dict = request.get_json()
+    question = create_question(body_dict)
+    ai_response = get_ai_response(question)
 
-    db["chats"].insert_one(chatbot.asdict())
+    body_dict["ai_response"] = ai_response
+    body_dict["id"] = 1
 
-    return {"message": chatbot.get_ai_response()}
+    chatbot = ChatBot(**body_dict)
+
+    db["chats"].insert_one(asdict(chatbot))
+
+    return asdict(chatbot)
+
+
+@app.route("/api/history/<string:username>", methods=["GET"])
+def history(username):
+    """유저의 히스토리 리스트를 쿼리할 때 사용함."""
+    cursor = db["chats"].find({"user_id": username})
+    if not cursor:
+        raise NotFound("chat not found")
+    return cursor
+
+
+@app.route("/api/chat/<int:id>", methods=["GET", "POST"])
+def chat(id):
+    """
+    chat regeneration에 사용될 함수
+
+    ## POST request type:
+    - user_status: ["불안", "초조", "산만"]
+    - user_goal: "집중력 향상
+    - _id: mongodb object id
+
+    ## POST response type:
+    수정된 `ChatBot` 객체가 반환됨.
+    """
+    cursor = db["chats"].find_one({"id", id})
+    if not cursor:
+        raise NotFound("Chat not found")
+    if request.method == "GET":
+        return cursor
+
+    # POST
+
+    question = create_question(cursor)
+    ai_response = get_ai_response(question)
+
+    chatbot = ChatBot(**cursor)
+    chatbot.ai_messages.append(ai_response)
+    db["chats"].replace_one({"id": chatbot.id}, asdict(chatbot))
+
+    return asdict(chatbot)
 
 
 if __name__ == '__main__':
