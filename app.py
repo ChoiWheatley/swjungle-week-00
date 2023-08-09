@@ -116,7 +116,7 @@ def mainRender(username):
     question = create_question(body_dict)
     ai_response = get_ai_response(question)
 
-    body_dict["ai_response"] = ai_response
+    body_dict["ai_response"] = [ai_response]
     body_dict["id"] = 1
 
     chatbot = ChatBot(**body_dict)
@@ -133,7 +133,7 @@ def history(username):
     if not cursor:
         raise NotFound("chat not found")
     return [
-        {k: v for k, v in cur.items() if k in inspect.signature(ChatBot).parameters}
+        {k: v for k, v in cur.items() if k in ChatBot.attrs()}
         for cur in cursor]
 
 
@@ -154,18 +154,18 @@ def chat(id):
     if not cursor:
         raise NotFound("Chat not found")
     if request.method == "GET":
-        return {k: v for k, v in cursor.items() if k in inspect.signature(ChatBot).parameters}
+        return {k: v for k, v in cursor.items() if k in ChatBot.attrs()}
 
     # POST
 
     question = create_question(cursor)
     ai_response = get_ai_response(question)
 
-    chatbot = ChatBot(**cursor)
-    chatbot.ai_messages.append(ai_response)
-    db["chats"].replace_one({"id": chatbot.id}, asdict(chatbot))
+    cursor["ai_response"].append(ai_response)
+    db["chats"].replace_one({"id": cursor["id"]}, {k: v for k, v in cursor.items()
+                                                   if k in ChatBot.attrs()})
 
-    return asdict(chatbot)
+    return {k: v for k, v in cursor.items() if k in ChatBot.attrs()}
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import inspect
 from typing import List
 import openai
 from decouple import config
@@ -102,3 +103,7 @@ class ChatBot:
     user_status: List[str]
     user_goal: str
     ai_response: List[str]
+
+    @classmethod
+    def attrs(cls):
+        return inspect.signature(cls).parameters
