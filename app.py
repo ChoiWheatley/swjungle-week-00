@@ -1,6 +1,8 @@
 from dataclasses import asdict
 import inspect
 
+from bson import ObjectId
+
 from chatbot import ChatBot, create_question, get_ai_response
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
@@ -99,7 +101,7 @@ def mainRender(username):
 
     - user_status: ['불안', '초조', '산만'],
     - user_goal: '집중력 향상'
-    - user_id: TODO - 현재는 username 이지만, 유니크한 user_id가 와야함.
+    - user_id: str(ObjectId)
 
     ### POST response type
 
@@ -117,55 +119,57 @@ def mainRender(username):
     ai_response = get_ai_response(question)
 
     body_dict["ai_response"] = [ai_response]
-    body_dict["id"] = 1
 
-    chatbot = ChatBot(**body_dict)
+    result = db["chats"].insert_one(body_dict)
+    cursor = db["chats"].find_one(result.inserted_id)
 
-    db["chats"].insert_one(asdict(chatbot))
+    if cursor:
+        return asdict(ChatBot(**cursor))
+    raise NotFound("chat not found")
 
-    return asdict(chatbot)
 
+@app.route("/api/history/<string:user_id>", methods=["GET"])
+def history(user_id):
+    """
+    유저의 히스토리 리스트를 쿼리할 때 사용함.
 
-@app.route("/api/history/<string:username>", methods=["GET"])
-def history(username):
-    """유저의 히스토리 리스트를 쿼리할 때 사용함."""
-    cursor = db["chats"].find({"user_id": username})
+    ### GET response type
+
+    - List[dict(ChatBot)]
+    """
+    cursor = db["chats"].find({"user_id": user_id})
     if not cursor:
         raise NotFound("chat not found")
-    return [
-        {k: v for k, v in cur.items() if k in ChatBot.attrs()}
-        for cur in cursor]
+    return [asdict(ChatBot(**cur)) for cur in cursor]
 
 
-@app.route("/api/chat/<int:id>", methods=["GET", "POST"])
-def chat(id):
+@app.route("/api/chat/<string:_id>", methods=["GET", "POST"])
+def chat(_id: str):
     """
     chat regeneration에 사용될 함수
 
-    ## POST request type:
-    - user_status: ["불안", "초조", "산만"]
-    - user_goal: "집중력 향상
-    - _id: mongodb object id
+    ### POST request type:
 
-    ## POST response type:
-    수정된 `ChatBot` 객체가 반환됨.
+    - None
+
+    ### POST response type:
+
+    - 수정된 dict(ChatBot)
     """
-    cursor = db["chats"].find_one({"id": id})
+    cursor = db["chats"].find_one(ObjectId(_id))
     if not cursor:
         raise NotFound("Chat not found")
     if request.method == "GET":
-        return {k: v for k, v in cursor.items() if k in ChatBot.attrs()}
+        return asdict(ChatBot(**cursor))
 
     # POST
 
     question = create_question(cursor)
     ai_response = get_ai_response(question)
 
-    cursor["ai_response"].append(ai_response)
-    db["chats"].replace_one({"id": cursor["id"]}, {k: v for k, v in cursor.items()
-                                                   if k in ChatBot.attrs()})
+    db["chats"].update_one({"_id": ObjectId(_id)}, {"$push": {"ai_response": ai_response}})
 
-    return {k: v for k, v in cursor.items() if k in ChatBot.attrs()}
+    return asdict(ChatBot(**cursor))
 
 
 if __name__ == '__main__':

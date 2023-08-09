@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import inspect
+from re import A
 from typing import List
+from bson import ObjectId
 import openai
 from decouple import config
 
@@ -52,26 +54,6 @@ PROMPTS = [
     ("user_goal", "당신이 이루고자 하는 목표를 알려주세요.", "이루고자 하는 목표는 "),
 ]
 
-# class ChatBot:
-#     username: str  # TODO - replace user_id instead of username
-#     user_submit: dict
-#     ai_question: str
-#     ai_response: List[str]
-
-#     def __init__(self, username, user_submit) -> None:
-#         self.user_submit = user_submit
-#         self.ai_question = self.create_question(user_submit)
-#         self.username = username
-#         self.ai_response = self.get_ai_response()
-
-#     def asdict(self):
-#         return {
-#             "username": self.username,
-#             "user_submit": self.user_submit,
-#             "ai_question": self.ai_question,
-#             "ai_response": self.ai_response,
-#         }
-
 
 def get_ai_response(ai_question):
     """openai에게 문맥과 초기 대화를 넣어 요청을 보내게 만드는 함수"""
@@ -98,11 +80,25 @@ def create_question(user_submit) -> str:
 
 @dataclass
 class ChatBot:
-    id: int
+    _id: str
     user_id: str
     user_status: List[str]
     user_goal: str
     ai_response: List[str]
+
+    def __init__(
+        self,
+        _id: ObjectId,
+        user_id: str,
+        user_status: List[str],
+        user_goal: str,
+        ai_response: List[str],
+    ):
+        self._id = str(_id)
+        self.user_id = user_id
+        self.user_status = user_status
+        self.user_goal = user_goal
+        self.ai_response = ai_response
 
     @classmethod
     def attrs(cls):
