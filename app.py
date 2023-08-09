@@ -37,10 +37,8 @@ def login():
     # POST
     userId_receive = request.form.get('username')
     userPwd_receive = request.form.get('password')
-    if userId_receive == "":
-        flash("아이디를 입력해주세요.")
-    if userPwd_receive == "":
-        flash("비밀번호를 입력해주세요.")
+    if userId_receive == "" or userPwd_receive == "":
+        flash("빈칸을 모두 입력해주세요!")
         return render_template("login.html")
     
     user = db.users.find_one({'id':userId_receive}, {'pwd':userPwd_receive})
