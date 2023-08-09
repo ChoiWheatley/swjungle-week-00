@@ -9,7 +9,7 @@ let elMismatchmessage = document.querySelector('.mismatch-message')
 // password, password 확인 값 틀리면 alert
 document.getElementById('registerForm').addEventListener('submit', function(e) {
     if(!isMatch(passwordRegister.value, passwordRegisterRepeat.value)){
-        alert('Password Mismatch!!');
+        swal("회원가입 실패", 'Password Mismatch !!!', 'warning');
         e.preventDefault();
     }else{
         registerMember();
