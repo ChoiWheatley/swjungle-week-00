@@ -71,13 +71,16 @@ def registerRender():
             'id': userId_receive,
             'pwd': userPwd_receive
         }
-        if userId_receive == '' or userPwd_receive == '':
-            db.users.insert_one()
+        if userId_receive == '' or request.form.get('password') == '':
+            flash("빈칸을 모두 입력해주세요!")
+            return render_template("register.html")
+        if db.users.find_one({'id':userId_receive}) is not None:
+            flash("다른 분이 사용 중인 아이디입니다. 다시 입력해주세요.")
+            return render_template("register.html")
         else:
             db.users.insert_one(user)
             flash("회원가입에 성공하였습니다!")
             return redirect('/login')
-        print(user)
     else:
         return render_template("register.html")
 

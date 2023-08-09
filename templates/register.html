@@ -4,31 +4,57 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <title>register</title>
 </head>
 <body>
-    <div>This is register webpage.</div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <div class="box column is-two-fifths">
+        <div class="is-size-3" style="font-weight: 400;">REGISTER</div>
+        <form method="POST" id="registerForm">
+            <div class="field">
+                <p class="control has-icons-left has-icons-right">
+                    <input class="input is-info" id="id_give" type="text" name="username" placeholder="아이디를 입력하세요.">
+                    <label for="username"></label>
+                    <span class="icon is-small is-left">
+                    <i class="fas fa-user"></i>
+                    </span>
+                </p>
+            </div>
 
-    <form method="POST" id="registerForm">
-
-        <div class="input-box">
-            <input id="id_give" type="text" name="username" placeholder="아이디를 입력하세요.">
-            <label for="username"></label>
-        </div>
-
-        <div class="input-box">
-            <input id="pwd_give" type="password" name="password" placeholder="비밀번호를 입력하세요.">
-            <label for="password"></label>
-        </div>
-
-        <div class="input-box" id="repeat">
-            <input id="pwd_repeat" type="password" name="password" placeholder="비밀번호를 다시 입력하세요.">
-            <label for="password"></label>
-        </div>
-        <input type="submit" value="회원가입">
-    
-    </form>
+            <div class="field">
+                <p class="control has-icons-left">
+                    <input class="input is-info" id="pwd_give" type="password" name="password" placeholder="비밀번호를 입력하세요.">
+                    <label for="password"></label>
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                </p>
+            </div>
+            <div class="field" id="repeat">
+                <p class="control has-icons-left has-icons-right">
+                    <input class="input is-info" id="pwd_repeat" type="password" name="password" placeholder="비밀번호를 다시 입력하세요." >
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <span class="icon is-small is-right">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </p>
+            </div>
+            <input class="button is-info" type="submit" value="가입하기">
+            <a class="button is-info is-light" href="/login">취소</a>
+        </form>
+    </div>
 
     <script src="static/registJS.js"></script>
 </body>
