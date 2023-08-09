@@ -150,11 +150,11 @@ def chat(id):
     ## POST response type:
     수정된 `ChatBot` 객체가 반환됨.
     """
-    cursor = db["chats"].find_one({"id", id})
+    cursor = db["chats"].find_one({"id": id})
     if not cursor:
         raise NotFound("Chat not found")
     if request.method == "GET":
-        return cursor
+        return {k: v for k, v in cursor.items() if k in inspect.signature(ChatBot).parameters}
 
     # POST
 
