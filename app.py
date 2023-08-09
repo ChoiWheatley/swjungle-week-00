@@ -1,7 +1,6 @@
 import chatbot
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash
-from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
 from decouple import config
