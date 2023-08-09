@@ -1,11 +1,17 @@
 import chatbot
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify, flash
+from flask import Flask, render_template, request, redirect, session, flash
+from werkzeug.security import generate_password_hash
 from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
+from decouple import config
 from decouple import config
 
 app = Flask(__name__)
 
+# 시크릿키 설정
+app.secret_key = config('APP_SECRET_KEY')
+
+client = MongoClient('localhost', 27017)
 # 시크릿키 설정
 app.secret_key = config('APP_SECRET_KEY')
 
@@ -18,7 +24,9 @@ collection3 = db['C']
 @app.route('/')
 def entrypoint():
     if 'username' in session:
-        return redirect('/main')
+        return f'''반갑습니다 {session["username"]}님!<br>
+        <a href="/main/{session["username"]}">mainPage</a> 
+        <a href="/logout">Logout</a>'''
     else:
         return redirect('/login')
 
@@ -26,7 +34,7 @@ def entrypoint():
 def login():
     if request.method == "GET":
         return render_template("login.html")
-    # POST 일 때
+    # POST
     userId_receive = request.form.get('username')
     userPwd_receive = request.form.get('password')
     if userId_receive == "":
@@ -40,7 +48,8 @@ def login():
         flash("존재하지 않는 유저입니다.")
         return render_template("login.html")
     session["username"] = userId_receive
-    return render_template("login.html")
+    session.permanent = True
+    return redirect(f'/main/{userId_receive}')
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -50,8 +59,13 @@ def logout():
 @app.route('/register', methods=["GET", "POST"])
 def registerRender():
     if request.method == "POST":
+        hash_and_salted_password = generate_password_hash(
+            request.form.get('password'),
+            method="pbkdf2:sha256",
+            salt_length=8
+        )
         userId_receive = request.form.get('username')
-        userPwd_receive = request.form.get('password')
+        userPwd_receive = hash_and_salted_password
         
         user = {
             'id': userId_receive,
@@ -61,13 +75,14 @@ def registerRender():
             db.users.insert_one()
         else:
             db.users.insert_one(user)
-            return jsonify({'result':'success', 'msg':'POST 연결되었습니다!'})
+            flash("회원가입에 성공하였습니다!")
+            return redirect('/login')
         print(user)
     else:
         return render_template("register.html")
 
-@app.route('/main', methods=["GET", "POST"])
-def mainRender():
+@app.route('/main/<string:username>', methods=["GET", "POST"])
+def mainRender(username):
     """
     [GET]
     return main.html
