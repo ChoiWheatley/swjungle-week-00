@@ -9,9 +9,10 @@ meditation center
 
 대화내역은 데이터베이스에 기록되며, 유저는 과거의 대화를 다시 읽거나 응답 재생성이 가능합니다.
 
-예시 화면 (figma)
+예시 화면
 
-<img width="449" alt="스크린샷 2023-08-07 오후 9 00 59" src="https://github.com/ChoiWheatley/swjungle-week-00/assets/18757823/e01b0743-cd56-42ad-92e1-8cb37a2841a0">
+![스크린샷 2023-08-10 오전 6 20 58](https://github.com/ChoiWheatley/swjungle-week-00/assets/18757823/e8ea0725-3275-42e1-abe9-eb45de646a43)
+
 
 ## 기술 스택
 
