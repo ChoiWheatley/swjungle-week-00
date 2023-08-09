@@ -1,7 +1,7 @@
 import chatbot
 from flask import Flask, render_template, request, redirect, session, flash
+from datetime import timedelta
 from werkzeug.security import generate_password_hash
-from jinja2 import Environment, FileSystemLoader, Template
 from pymongo import MongoClient
 from decouple import config
 
@@ -42,6 +42,7 @@ def login():
         return render_template("login.html")
     session["username"] = userId_receive
     session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=30)
     return redirect(f'/main/{userId_receive}')
 
 @app.route('/logout', methods=['GET'])
