@@ -9,6 +9,34 @@ let tmpRegenerateText = "";
 
 let findHistory = "";
 
+let gSession = {
+    chatId: null,
+    userStatus: [],
+    userGoal: null,
+
+    setChatId: (id) => {
+        this.chatId = id;
+    },
+
+    setUserStatus: (stats) => {
+        this.userStatus = stats;
+    },
+
+    setUserGoal: (goal) => {
+        this.userGoal = goal;
+    }
+};
+
+let $messages = document.querySelector(".messages");
+let $sentUl = document.querySelector("#sentUl");
+
+
+window.onload = function() {
+
+    callHistoryData();
+
+};
+
 $("#img1").hide();
 $("#img2").hide();
 $("#img3").hide();
@@ -49,9 +77,9 @@ function onSubmitCheckbox2(){
 
     var selectedValue = document.querySelector('input[name="choice"]:checked');
     if(selectedValue) {
-        console.log(selectedValue.value);
+        // console.log(selectedValue.value);
     }else{
-        console.log("없음");
+        // console.log("없음");
     }
     tmpList2 = selectedValue.value;
     $("#submit2").hide();
@@ -64,7 +92,7 @@ function onSubmitCheckbox2(){
 
 function POSTJSON(){
 
-    showLoading();
+    // showLoading();
 
     var tmp = {
         'user_status': tmpList,
@@ -94,7 +122,7 @@ function POSTJSON(){
 
 function POSTJSON2(){
 
-    showLoading();
+    // showLoading();
 
     var tmp = {
         'user_status': tmpList,
@@ -102,7 +130,7 @@ function POSTJSON2(){
     };
     $.ajax({
         type: 'POST',
-        url: window.location.href,
+        url: "/api/chat/" + gSession.chatId,
         contentType: 'application/json',
         data: JSON.stringify(tmp),
         dataType: 'json',
@@ -160,7 +188,12 @@ function makeCheckbox2(){
 
 //어떤 히스토리든 클릭하면 현재 대화상태를 싹 밀어버림.
 function clearChat(){
-    
+    document.querySelectorAll(".replies").forEach((elem) => {
+        elem.remove()
+    });
+    document.querySelectorAll(".sent").forEach((elem) => {
+        elem.remove()
+    });
 }
 
 //메인채팅으로 이동
@@ -179,29 +212,110 @@ function callHistoryData(){
         contentType: 'application/json',
         success: function (responses) {
             for (let response of responses) {
-                createHistory(response["user_status"], response["user_goal"]);
+                createHistory(response);
             }
         },
+        complete: () => {
+            hideLoading();
+        }
     })
+    .done((data) => {
+        // console.log(data);
+        document.querySelectorAll("[type=history]").forEach((elem) => {
+            gSession.setChatId(elem._id);
+            gSession.setUserStatus(elem.user_status);
+            gSession.setUserGoal(elem.user_goal);
+
+            elem.addEventListener("click", (e) => {
+                /**
+                 * 
+                */
+                clearChat();
+                $.ajax({
+                    type: "GET",
+                    url: "/api/chat/" + elem.id,
+                    contentType: "application/json",
+                    success: (chat) => {
+                        $messages.innerHTML = `
+        <ul id = "sentUl">
+
+          <li class="sent">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" />
+            <p>현재 상태를 모두 체크해 주세요.</p>
+          </li>
+          <li class="replies">
+            <img src="https://velog.velcdn.com/images/doyolee/post/8ad37313-2695-4a32-af27-af51d50f7387/image.png" alt="" />
+            <p id ="form1"></p>
+          </li>
+
+          <li class="sent">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" id="img1"/>
+            <p id="promp1">이루고자 하는 목표는 무엇인가요?</p>
+          </li>
+
+          <li class="replies">
+            <img src="https://velog.velcdn.com/images/doyolee/post/8ad37313-2695-4a32-af27-af51d50f7387/image.png" alt="" id="img2"/>
+            <p id ="form2"></p>
+          </li>
+
+          <li class="sent">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" id="img3"/>
+            <p id="chat1"></p>
+        </ul>
+                        `;
+                        makeCheckbox1();
+                        makeCheckbox2();
+
+                        for (let stat of chat.user_status) {
+                            document.querySelector(`[value=${stat}]`).checked = true;
+                        }
+
+                        document.querySelector(`[value=${chat.user_goal}]`).checked = true;
+
+                        for (let ai_response of chat.ai_response) {
+                            const $li = document.createElement("li");
+                            $li.className = "sent";
+                            $messages.appendChild();
+
+                        }
+                    },
+                    complete: () => {
+                        hideLoading();
+                    }
+                })
+            });
+        });
+    })
+}
+
+function createSentLiElement(parentNode, innerText) {
+    const $li = document.createElement("li");
+    $li.className = "sent";
+    $li.innerHTML = `
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="">
+    <p>${innerText}</p>
+    `;
+    // TODO - 이것저거 추가하기
+    parentNode.appendChild($li);
 }
 
 //히스토리를 클릭하면 그 히스토리로 이동.
 function openHistory(){
-    window.location.href = window.location.href;
+
 }
 
 
 //두 번째 버튼을 누르면 히스토리가 생성됨(좌측)
-function createHistory(user_statuses, user_goal){
+function createHistory(chat){
     var tmpContent = "";
     var tmpDetail = "";
 
-    for (let user_status of user_statuses) {
+    for (let user_status of chat.user_status) {
         tmpContent += user_status + ",";
     }
     findHistory = tmpContent;
 
-    tmpDetail = user_goal
+    tmpDetail = chat.user_goal
 
     var tmpHistory = `
     <div class="wrap">
@@ -213,7 +327,7 @@ function createHistory(user_statuses, user_goal){
       </div>
     </div>
   </li>`
-    $("#ulAppend").append("<li class=\"contact active\">" + tmpHistory + "</li>");
+    $("#ulAppend").append(`<li type='history' class=\"contact active\" id='${chat._id}'>` + tmpHistory + "</li>");
 }
 
 function pTagTextNumber(chat, chatAll){
