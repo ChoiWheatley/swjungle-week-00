@@ -47,9 +47,8 @@
     <div id="sidepanel">
       <div id="profile">
         <div class="wrap">
-          <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
           <p>{{session['username']}} 님 반갑습니다.</p>
-          <i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
+          <a href="/logout">Logout</a>
           <div id="status-options">
             <ul>
               <li id="status-online" class="active"><span class="status-circle"></span> <p>Online</p></li>
@@ -58,19 +57,7 @@
               <li id="status-offline"><span class="status-circle"></span> <p>Offline</p></li>
             </ul>
           </div>
-          <div id="expanded">
-            <label for="twitter"><i class="fa fa-facebook fa-fw" aria-hidden="true"></i></label>
-            <input name="twitter" type="text" value="mikeross" />
-            <label for="twitter"><i class="fa fa-twitter fa-fw" aria-hidden="true"></i></label>
-            <input name="twitter" type="text" value="ross81" />
-            <label for="twitter"><i class="fa fa-instagram fa-fw" aria-hidden="true"></i></label>
-            <input name="twitter" type="text" value="mike.ross" />
-          </div>
         </div>
-      </div>
-      <div id="search">
-        <label for=""><i class="fa fa-search" aria-hidden="true"></i></label>
-        <input type="text" placeholder="Search contacts..." />
       </div>
       <div id="contacts">
         <ul id="ulAppend">
@@ -92,12 +79,6 @@
       <div class="contact-profile">
         <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" />
         <p>명상 봇</p>
-        <div class="social-media">
-          <i class="fa fa-facebook" aria-hidden="true"></i>
-          
-          <i class="fa fa-twitter" aria-hidden="true"></i>
-          <i class="fa fa-instagram" aria-hidden="true"></i>
-        </div>
       </div>
       <div class="messages">
         <ul id = "sentUl">

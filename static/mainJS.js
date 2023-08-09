@@ -82,7 +82,7 @@ function onSubmitCheckbox2(){
 
 function POSTJSON(){
 
-    // showLoading();
+    showLoading();
 
     var tmp = {
         'user_status': tmpList,
@@ -102,7 +102,9 @@ function POSTJSON(){
             document.getElementById('chat1').innerHTML = msg;
             $("#btnHideShow").show();
 
-            createHistory();
+            createHistory(response);
+            callHistoryData();
+            gSession.setChatId(response["_id"]);
         },
         complete: function(){
             hideLoading();
@@ -112,7 +114,7 @@ function POSTJSON(){
 
 function POSTJSON2(){
 
-    // showLoading();
+    showLoading();
 
     var tmp = {
         'user_status': tmpList,
@@ -125,7 +127,7 @@ function POSTJSON2(){
         data: JSON.stringify(tmp),
         dataType: 'json',
         success: function (response) {
-            let msg = response['ai_response'];
+            let msg = response['ai_response'].at(-1);
 
             tmpRegenerateText = `<img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="" id="img1"/>
             <p>${msg}</p>`;
